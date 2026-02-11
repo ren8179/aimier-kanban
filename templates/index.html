@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>爱弥儿任务看板 💙</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>💙 爱弥儿任务看板</h1>
+            <div class="stats">
+                <span class="stat-item">总任务: <strong id="stat-total">0</strong></span>
+                <span class="stat-item">待办: <strong id="stat-todo">0</strong></span>
+                <span class="stat-item">进行中: <strong id="stat-in-progress">0</strong></span>
+                <span class="stat-item">已完成: <strong id="stat-done">0</strong><span id="stat-archived-badge" class="archive-badge" style="display:none">+归档</span></span>
+            </div>
+        </header>
+
+        <div class="toolbar">
+            <button class="btn btn-primary" onclick="openModal()">+ 新建任务</button>
+            <button class="btn btn-archive" onclick="openArchiveModal()">📦 查看归档 <span id="archive-count-badge" class="badge">0</span></button>
+            <input type="text" id="search-input" placeholder="搜索任务..." oninput="searchTasks()">
+            <select id="priority-filter" onchange="filterTasks()">
+                <option value="">所有优先级</option>
+                <option value="high">高优先级</option>
+                <option value="medium">中优先级</option>
+                <option value="low">低优先级</option>
+            </select>
+            <select id="tag-filter" onchange="filterTasks()">
+                <option value="">所有标签</option>
+            </select>
+        </div>
+
+        <div class="board">
+            <div class="column" data-status="todo">
+                <div class="column-header">
+                    <span class="column-title">📋 待办</span>
+                    <span class="column-count" id="count-todo">0</span>
+                </div>
+                <div class="task-list" id="todo-list" ondrop="drop(event, 'todo')" ondragover="allowDrop(event)">
+                </div>
+            </div>
+
+            <div class="column" data-status="in_progress">
+                <div class="column-header">
+                    <span class="column-title">🚀 进行中</span>
+                    <span class="column-count" id="count-in-progress">0</span>
+                </div>
+                <div class="task-list" id="in-progress-list" ondrop="drop(event, 'in_progress')" ondragover="allowDrop(event)">
+                </div>
+            </div>
+
+            <div class="column" data-status="done">
+                <div class="column-header">
+                    <span class="column-title">✅ 已完成</span>
+                    <span class="column-count" id="count-done">0</span>
+                </div>
+                <div class="task-list" id="done-list" ondrop="drop(event, 'done')" ondragover="allowDrop(event)">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Task Modal -->
+    <div class="modal" id="task-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title">新建任务</h2>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            <form id="task-form" onsubmit="saveTask(event)">
+                <input type="hidden" id="task-id">
+                <div class="form-group">
+                    <label>标题</label>
+                    <input type="text" id="task-title" required placeholder="输入任务标题">
+                </div>
+                <div class="form-group">
+                    <label>描述</label>
+                    <textarea id="task-description" rows="3" placeholder="输入任务描述"></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>优先级</label>
+                        <select id="task-priority">
+                            <option value="low">🟢 低</option>
+                            <option value="medium" selected>🟡 中</option>
+                            <option value="high">🔴 高</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>截止日期</label>
+                        <input type="date" id="task-due-date">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>标签（用逗号分隔）</label>
+                    <input type="text" id="task-tags" placeholder="例如: 工作, 重要, 待审核">
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">取消</button>
+                    <button type="submit" class="btn btn-primary">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Archive Modal -->
+    <div class="modal" id="archive-modal">
+        <div class="modal-content archive-modal-content">
+            <div class="modal-header">
+                <h2>📦 归档任务</h2>
+                <button class="close-btn" onclick="closeArchiveModal()">×</button>
+            </div>
+            <div class="archive-filters">
+                <select id="archive-month-filter" onchange="filterArchives()">
+                    <option value="">所有月份</option>
+                </select>
+                <span class="archive-info">已归档任务将在超过10个已完成任务时自动保存</span>
+            </div>
+            <div class="archive-list" id="archive-list">
+                <!-- Archived tasks will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
