@@ -13,14 +13,15 @@ def get_db():
     """获取数据库连接"""
     if not os.path.exists(DATABASE):
         init_db()
-    conn = sqlite3.connect(DATABASE)
+    # 添加 timeout=10 等待锁释放，check_same_thread=False 允许多线程访问
+    conn = sqlite3.connect(DATABASE, timeout=10, check_same_thread=False)
     conn.row_factory = sqlite3.Row
     return conn
 
 def init_db():
     """初始化数据库"""
     os.makedirs('data', exist_ok=True)
-    conn = sqlite3.connect(DATABASE)
+    conn = sqlite3.connect(DATABASE, timeout=10)
     cursor = conn.cursor()
     
     cursor.execute('''
